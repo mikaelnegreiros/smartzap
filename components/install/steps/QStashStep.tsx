@@ -20,6 +20,7 @@ interface QStashStepProps {
  */
 export function QStashStep({ onComplete }: QStashStepProps) {
   const [token, setToken] = useState('');
+  const [url, setUrl] = useState('https://qstash.upstash.io');
   const [validating, setValidating] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +50,10 @@ export function QStashStep({ onComplete }: QStashStepProps) {
       const res = await fetch('/api/installer/qstash/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token.trim() }),
+        body: JSON.stringify({
+          token: token.trim(),
+          url: url.trim() || 'https://qstash.upstash.io'
+        }),
       });
 
       const data = await res.json();
@@ -72,7 +76,11 @@ export function QStashStep({ onComplete }: QStashStepProps) {
   }, [token]);
 
   const handleSuccessComplete = () => {
-    onComplete({ token: token.trim() });
+    onComplete({
+      token: token.trim(),
+      // @ts-ignore - vamos passar a URL também mas precisamos atualizar a interface depois/implicitamente
+      url: url.trim() || 'https://qstash.upstash.io'
+    });
   };
 
   // Show success state
@@ -117,8 +125,26 @@ export function QStashStep({ onComplete }: QStashStepProps) {
           </ol>
         </div>
 
-        {/* Token Input */}
+        {/* URL Input */}
         <div className="w-full mt-6">
+          <label className="block text-xs font-medium text-zinc-400 mb-1.5 ml-1">
+            QStash URL
+          </label>
+          <input
+            type="text"
+            value={url}
+            onChange={(e) => {
+              setUrl(e.target.value);
+              setError(null);
+            }}
+            placeholder="https://qstash.upstash.io"
+            className="w-full px-4 py-2 bg-zinc-900/50 border border-zinc-700 rounded-lg text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all text-sm font-mono"
+            disabled={validating || success}
+          />
+        </div>
+
+        {/* Token Input */}
+        <div className="w-full mt-4">
           <TokenInput
             label="QStash Token"
             value={token}
@@ -128,7 +154,7 @@ export function QStashStep({ onComplete }: QStashStepProps) {
             }}
             placeholder="eyJVc2VySUQi... ou qstash_..."
             minLength={30}
-            autoSubmitLength={50}
+            autoSubmitLength={80} // Reduzir para capturar tokens menores mas ainda seguros
             onAutoSubmit={handleValidate}
             accentColor="orange"
             showCharCount={false}

@@ -147,22 +147,22 @@ export const TokenInput = forwardRef<HTMLInputElement, TokenInputProps>(
           animate={
             isError
               ? {
-                  x: [-4, 4, -4, 4, -2, 2, 0],
-                  transition: { duration: 0.4 },
-                }
+                x: [-4, 4, -4, 4, -2, 2, 0],
+                transition: { duration: 0.4 },
+              }
               : value.length === 0 && !validating && !success
                 ? {
-                    borderColor: [
-                      'rgba(10, 189, 198, 0.2)',
-                      'rgba(10, 189, 198, 0.5)',
-                      'rgba(10, 189, 198, 0.2)',
-                    ],
-                    transition: {
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    },
-                  }
+                  borderColor: [
+                    'rgba(10, 189, 198, 0.2)',
+                    'rgba(10, 189, 198, 0.5)',
+                    'rgba(10, 189, 198, 0.2)',
+                  ],
+                  transition: {
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  },
+                }
                 : {}
           }
           className={cn(
@@ -172,9 +172,9 @@ export const TokenInput = forwardRef<HTMLInputElement, TokenInputProps>(
             'transition-all duration-200',
             // Default state
             !isError &&
-              !success &&
-              !validating &&
-              'border-[var(--br-dust-gray)]/50',
+            !success &&
+            !validating &&
+            'border-[var(--br-dust-gray)]/50',
             !isError && !success && !validating && colors.focus,
             // Validating
             validating && colors.validating,
@@ -183,7 +183,7 @@ export const TokenInput = forwardRef<HTMLInputElement, TokenInputProps>(
             success && colors.success,
             // Error
             isError &&
-              'border-[var(--br-neon-pink)] bg-[var(--br-neon-pink)]/10 shadow-[0_0_15px_var(--br-neon-pink)/0.3]'
+            'border-[var(--br-neon-pink)] bg-[var(--br-neon-pink)]/10 shadow-[0_0_15px_var(--br-neon-pink)/0.3]'
           )}
         >
           {/* Terminal prompt */}
@@ -195,6 +195,12 @@ export const TokenInput = forwardRef<HTMLInputElement, TokenInputProps>(
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onPaste={handlePaste}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !isDisabled && onAutoSubmit) {
+                e.preventDefault();
+                onAutoSubmit();
+              }
+            }}
             placeholder={placeholder}
             disabled={isDisabled}
             className={cn(

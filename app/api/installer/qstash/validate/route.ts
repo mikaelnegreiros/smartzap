@@ -8,7 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function POST(req: NextRequest) {
   try {
-    const { token } = await req.json();
+    const { token, url } = await req.json();
+    const qstashUrl = url || 'https://qstash.upstash.io';
 
     // Validação básica
     if (!token || typeof token !== 'string') {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     // Validar token fazendo uma requisição de listagem de schedules
     // Este endpoint aceita GET e retorna 200 se o token for válido
-    const qstashRes = await fetch('https://qstash.upstash.io/v2/schedules', {
+    const qstashRes = await fetch(`${qstashUrl}/v2/schedules`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
