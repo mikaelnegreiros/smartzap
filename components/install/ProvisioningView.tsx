@@ -48,6 +48,9 @@ export function ProvisioningView({ data, progress, title, subtitle, onProgress, 
       },
       qstash: {
         token: data.qstashToken,
+        url: data.qstashUrl,
+        currentSigningKey: data.qstashCurrentSigningKey,
+        nextSigningKey: data.qstashNextSigningKey,
       },
       redis: {
         restUrl: data.redisRestUrl,

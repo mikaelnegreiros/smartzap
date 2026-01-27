@@ -9,7 +9,12 @@ import { ValidatingOverlay } from '../ValidatingOverlay';
 import { SuccessCheckmark } from '../SuccessCheckmark';
 
 interface QStashStepProps {
-  onComplete: (data: { token: string }) => void;
+  onComplete: (data: {
+    token: string;
+    url?: string;
+    qstashCurrentSigningKey?: string;
+    qstashNextSigningKey?: string;
+  }) => void;
 }
 
 /**
@@ -24,6 +29,43 @@ export function QStashStep({ onComplete }: QStashStepProps) {
   const [validating, setValidating] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // States para keys (opcionais, mas capturadas no paste)
+  const [currentSigningKey, setCurrentSigningKey] = useState('');
+  const [nextSigningKey, setNextSigningKey] = useState('');
+
+  const handleBulkPaste = useCallback((text: string) => {
+    // Regex para capturar chaves típicas de .env
+    const urlMatch = text.match(/QSTASH_URL=["']?([^"'\n]+)["']?/);
+    const tokenMatch = text.match(/QSTASH_TOKEN=["']?([^"'\n]+)["']?/);
+    const currentKeyMatch = text.match(/QSTASH_CURRENT_SIGNING_KEY=["']?([^"'\n]+)["']?/);
+    const nextKeyMatch = text.match(/QSTASH_NEXT_SIGNING_KEY=["']?([^"'\n]+)["']?/);
+
+    let parsed = false;
+
+    if (urlMatch) {
+      setUrl(urlMatch[1]);
+      parsed = true;
+    }
+
+    if (tokenMatch) {
+      setToken(tokenMatch[1]);
+      parsed = true;
+    }
+
+    if (currentKeyMatch) setCurrentSigningKey(currentKeyMatch[1]);
+    if (nextKeyMatch) setNextSigningKey(nextKeyMatch[1]);
+
+    if (parsed) {
+      // Pequeno feedback visual ou limpar erro
+      setError(null);
+      // Opcional: Auto-submit se tiver token
+      if (tokenMatch && tokenMatch[1].length >= 30) {
+        // Deixa o usuário conferir ou auto-submit?
+        // Vamos deixar o user dar enter para confirmar
+      }
+    }
+  }, []);
 
   // Valida formato do QStash token
   // Pode ser: base64 JSON (eyJ...), JWT (3 partes com .), ou prefixo qstash_
@@ -78,8 +120,9 @@ export function QStashStep({ onComplete }: QStashStepProps) {
   const handleSuccessComplete = () => {
     onComplete({
       token: token.trim(),
-      // @ts-ignore - vamos passar a URL também mas precisamos atualizar a interface depois/implicitamente
-      url: url.trim() || 'https://qstash.upstash.io'
+      url: url.trim(),
+      qstashCurrentSigningKey: currentSigningKey.trim(),
+      qstashNextSigningKey: nextSigningKey.trim(),
     });
   };
 
@@ -161,6 +204,7 @@ export function QStashStep({ onComplete }: QStashStepProps) {
             validating={validating}
             success={success}
             error={error || undefined}
+            onCustomPaste={handleBulkPaste}
           />
         </div>
 

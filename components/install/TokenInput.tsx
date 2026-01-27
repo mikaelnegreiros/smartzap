@@ -23,6 +23,7 @@ interface TokenInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   value: string;
   onChange: (value: string) => void;
+  onCustomPaste?: (value: string) => void;
   label?: string;
   validating?: boolean;
   success?: boolean;
@@ -98,6 +99,7 @@ export const TokenInput = forwardRef<HTMLInputElement, TokenInputProps>(
       masked = true,
       disabled,
       className,
+      onCustomPaste,
       ...props
     },
     ref
@@ -126,6 +128,11 @@ export const TokenInput = forwardRef<HTMLInputElement, TokenInputProps>(
 
     // Feedback visual de paste
     const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
+      const pastedData = e.clipboardData.getData('text');
+      if (onCustomPaste) {
+        onCustomPaste(pastedData);
+      }
+
       setJustPasted(true);
       setTimeout(() => setJustPasted(false), 1500);
     };

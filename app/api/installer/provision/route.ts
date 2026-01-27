@@ -54,6 +54,9 @@ const ProvisionSchema = z.object({
   }),
   qstash: z.object({
     token: z.string().min(30),
+    url: z.string().url().optional().default('https://qstash.upstash.io'),
+    currentSigningKey: z.string().optional(),
+    nextSigningKey: z.string().optional(),
   }),
   redis: z.object({
     restUrl: z.string().url(),
@@ -172,8 +175,12 @@ async function validateVercelToken(token: string): Promise<{ projectId: string; 
   };
 }
 
-async function validateQStashToken(token: string): Promise<void> {
-  const res = await fetch('https://qstash.upstash.io/v2/schedules', {
+async function validateQStashToken(token: string, url: string = 'https://qstash.upstash.io'): Promise<void> {
+  // Extract domain from URL to build API endpoint
+  // url e.g. https://qstash-eu-central-1.upstash.io
+  const apiUrl = `${url}/v2/schedules`;
+
+  const res = await fetch(apiUrl, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -556,7 +563,7 @@ export async function POST(req: Request) {
         subtitle: step6.subtitle,
       });
 
-      await validateQStashToken(qstash.token);
+      await validateQStashToken(qstash.token, qstash.url);
       console.log('[provision] ✅ Step 6/12: Validate QStash - COMPLETO');
       stepIndex++;
 
@@ -592,6 +599,9 @@ export async function POST(req: Request) {
         { key: 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', value: anonKey, targets: [...envTargets] },
         { key: 'SUPABASE_SECRET_KEY', value: serviceRoleKey, targets: [...envTargets] },
         { key: 'QSTASH_TOKEN', value: qstash.token, targets: [...envTargets] },
+        { key: 'QSTASH_URL', value: qstash.url, targets: [...envTargets] },
+        { key: 'QSTASH_CURRENT_SIGNING_KEY', value: qstash.currentSigningKey || '', targets: [...envTargets] },
+        { key: 'QSTASH_NEXT_SIGNING_KEY', value: qstash.nextSigningKey || '', targets: [...envTargets] },
         { key: 'UPSTASH_REDIS_REST_URL', value: redis.restUrl, targets: [...envTargets] },
         { key: 'UPSTASH_REDIS_REST_TOKEN', value: redis.restToken, targets: [...envTargets] },
         { key: 'MASTER_PASSWORD', value: passwordHash, targets: [...envTargets] },

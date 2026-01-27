@@ -53,6 +53,9 @@ export interface InstallData {
   vercelToken: string;
   supabasePat: string;
   qstashToken: string;
+  qstashUrl?: string;
+  qstashCurrentSigningKey?: string;
+  qstashNextSigningKey?: string;
   redisRestUrl: string;
   redisRestToken: string;
 }
@@ -64,6 +67,9 @@ export const EMPTY_INSTALL_DATA: InstallData = {
   vercelToken: '',
   supabasePat: '',
   qstashToken: '',
+  qstashUrl: '',
+  qstashCurrentSigningKey: '',
+  qstashNextSigningKey: '',
   redisRestUrl: '',
   redisRestToken: '',
 };
@@ -240,6 +246,9 @@ export interface ProvisionPayload {
   };
   qstash: {
     token: string;
+    url?: string;
+    currentSigningKey?: string;
+    nextSigningKey?: string;
   };
   redis: {
     restUrl: string;
